@@ -9,7 +9,7 @@ from tensorflow import keras
 # import numpy as np
 import matplotlib.pyplot as plt
 
-import os
+import osll
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
