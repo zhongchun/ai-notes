@@ -18,10 +18,11 @@ def test_set_check(identifier, test_ratio, hash):
 
 
 if __name__ == '__main__':
-    print("hi")
-    ret = test_set_check(1, 0.2, hashlib.md5)
+    ret = test_set_check(4, 0.2, hashlib.md5)
+    print("==================================================")
     print(ret)
     print("==================================================")
+    print(256 * 0.2)
     hash = hashlib.md5
-    h = hash(np.int64(1))
+    h = hash(np.int64(4))
     print(h.digest()[-1])
