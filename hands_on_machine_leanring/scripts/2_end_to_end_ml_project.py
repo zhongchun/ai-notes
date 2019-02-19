@@ -35,6 +35,11 @@ CHAPTER_ID = "end_to_end_project"
 IMAGES_PATH = os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID)
 
 
+def print_format(v, length=120):
+    print('=' * length)
+    print(v)
+
+
 def save_fig(fig_id, tight_layout=True, fig_extension="png", resolution=300):
     path = os.path.join(IMAGES_PATH, fig_id + "." + fig_extension)
     print("Saving figure: ", fig_id)
@@ -330,5 +335,353 @@ print('=========================================================================
 print(housing.describe())
 
 # Prepare the data for Machine Learning algorithms
+housing = strat_train_set.drop("median_house_value", axis=1)  # drop labels for training set
+housing_labels = strat_train_set["median_house_value"].copy()
+print('===============================================================================================================')
+print(housing.head())
+print('===============================================================================================================')
+print(housing_labels.head())
+
+sample_incomplete_rows = housing[housing.isnull().any(axis=1)].head()
+print('===============================================================================================================')
+print(sample_incomplete_rows)
+
+# Process null value
+# sample_incomplete_rows.dropna(subset=["total_bedrooms"]) # option 1
+# sample_incomplete_rows.drop("total_bedrooms", axis=1) # option 2
+
+median = housing["total_bedrooms"].median()
+sample_incomplete_rows["total_bedrooms"].fillna(median, inplace=True)  # option 3
+print('===============================================================================================================')
+print(sample_incomplete_rows)
+
+print('===============================================================================================================')
+print(housing.head())
+print('===============================================================================================================')
+print(housing.info())
+
+# Use sklearn to process null value
+try:
+    from sklearn.impute import SimpleImputer  # Scikit-Learn 0.20+
+except ImportError:
+    from sklearn.preprocessing import Imputer as SimpleImputer
+
+imputer = SimpleImputer(strategy="median")
+housing_num = housing.drop('ocean_proximity', axis=1)
+
+imputer.fit(housing_num)
+print('===============================================================================================================')
+print(imputer.statistics_)
+print(housing_num.median().values)
+
+X = imputer.transform(housing_num)
+housing_tr = pd.DataFrame(X, columns=housing_num.columns, index=list(housing.index.values))
+
+print('===============================================================================================================')
+print(housing_tr.loc[sample_incomplete_rows.index.values])
+print('===============================================================================================================')
+print(imputer.strategy)
+print('===============================================================================================================')
+print(housing_tr.head())
+
+housing_tr = pd.DataFrame(X, columns=housing_num.columns)
+print('===============================================================================================================')
+print(housing_tr.head())
+
+# Handling Text and Categorical Attributes
+housing_cat = housing[['ocean_proximity']]
+print('===============================================================================================================')
+print(housing_cat.head(10))
+
+try:
+    from sklearn.preprocessing import OrdinalEncoder
+except ImportError:
+    from future_encoders import OrdinalEncoder  # Scikit-Learn < 0.20
+
+ordinal_encoder = OrdinalEncoder()
+housing_cat_encoded = ordinal_encoder.fit_transform(housing_cat)
+print('===============================================================================================================')
+print(housing_cat_encoded[:10])
+print(ordinal_encoder.categories_)
+
+try:
+    from sklearn.preprocessing import OrdinalEncoder  # just to raise an ImportError if Scikit-Learn < 0.20
+    from sklearn.preprocessing import OneHotEncoder
+except ImportError:
+    from future_encoders import OneHotEncoder  # Scikit-Learn < 0.20
+
+cat_encoder = OneHotEncoder()
+housing_cat_1hot = cat_encoder.fit_transform(housing_cat)
+print('===============================================================================================================')
+# housing_cat_1hot
+print(housing_cat_1hot.toarray())
+print(cat_encoder.categories_)
+
+print('===============================================================================================================')
+print(housing.columns)
+
+from sklearn.base import BaseEstimator, TransformerMixin
+
+# get the right column indices: safer than hard-coding indices 3, 4, 5, 6
+rooms_ix, bedrooms_ix, population_ix, household_ix = [
+    list(housing.columns).index(col)
+    for col in ("total_rooms", "total_bedrooms", "population", "households")]
 
 
+class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
+    def __init__(self, add_bedrooms_per_room=True):  # no *args or **kargs
+        self.add_bedrooms_per_room = add_bedrooms_per_room
+
+    def fit(self, X, y=None):
+        return self  # nothing else to do
+
+    def transform(self, X, y=None):
+        rooms_per_household = X[:, rooms_ix] / X[:, household_ix]
+        population_per_household = X[:, population_ix] / X[:, household_ix]
+        if self.add_bedrooms_per_room:
+            bedrooms_per_room = X[:, bedrooms_ix] / X[:, rooms_ix]
+            return np.c_[X, rooms_per_household, population_per_household,
+                         bedrooms_per_room]
+        else:
+            return np.c_[X, rooms_per_household, population_per_household]
+
+
+attr_adder = CombinedAttributesAdder(add_bedrooms_per_room=False)
+housing_extra_attribs = attr_adder.transform(housing.values)
+
+from sklearn.preprocessing import FunctionTransformer
+
+
+def add_extra_features(X, add_bedrooms_per_room=True):
+    rooms_per_household = X[:, rooms_ix] / X[:, household_ix]
+    population_per_household = X[:, population_ix] / X[:, household_ix]
+    if add_bedrooms_per_room:
+        bedrooms_per_room = X[:, bedrooms_ix] / X[:, rooms_ix]
+        return np.c_[X, rooms_per_household, population_per_household,
+                     bedrooms_per_room]
+    else:
+        return np.c_[X, rooms_per_household, population_per_household]
+
+
+attr_adder = FunctionTransformer(add_extra_features, validate=False,
+                                 kw_args={"add_bedrooms_per_room": False})
+housing_extra_attribs = attr_adder.fit_transform(housing.values)
+
+housing_extra_attribs = pd.DataFrame(
+    housing_extra_attribs,
+    columns=list(housing.columns) + ["rooms_per_household", "population_per_household"])
+print('===============================================================================================================')
+print(housing_extra_attribs.head())
+
+#  Build a pipeline for preprocessing the numerical attributes
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+
+num_pipeline = Pipeline([
+    ('imputer', SimpleImputer(strategy="median")),
+    ('attribs_adder', FunctionTransformer(add_extra_features, validate=False)),
+    ('std_scaler', StandardScaler()),
+])
+
+housing_num_tr = num_pipeline.fit_transform(housing_num)
+print('===============================================================================================================')
+print(housing_num_tr)
+print(housing_num_tr.shape)
+
+try:
+    from sklearn.compose import ColumnTransformer
+except ImportError:
+    from future_encoders import ColumnTransformer  # Scikit-Learn < 0.20
+
+num_attribs = list(housing_num)
+cat_attribs = ["ocean_proximity"]
+
+full_pipeline = ColumnTransformer([
+    ("num", num_pipeline, num_attribs),
+    ("cat", OneHotEncoder(), cat_attribs),
+])
+
+housing_prepared = full_pipeline.fit_transform(housing)
+print('===============================================================================================================')
+print(housing_prepared)
+print(housing_prepared.shape)
+
+# Select and train a model
+# LinearRegression
+from sklearn.linear_model import LinearRegression
+
+lin_reg = LinearRegression()
+lin_reg.fit(housing_prepared, housing_labels)
+
+# let's try the full preprocessing pipeline on a few training instances
+some_data = housing.iloc[:5]
+some_labels = housing_labels.iloc[:5]
+some_data_prepared = full_pipeline.transform(some_data)
+print('===============================================================================================================')
+print(some_data_prepared)
+print(some_data_prepared.shape)
+print("Predictions:", lin_reg.predict(some_data_prepared))
+print("Labels:", list(some_labels))
+
+from sklearn.metrics import mean_squared_error
+
+housing_predictions = lin_reg.predict(housing_prepared)
+lin_mse = mean_squared_error(housing_labels, housing_predictions)
+lin_rmse = np.sqrt(lin_mse)
+print('===============================================================================================================')
+print(lin_rmse)
+
+from sklearn.metrics import mean_absolute_error
+
+lin_mae = mean_absolute_error(housing_labels, housing_predictions)
+print_format(lin_mae)
+
+# DecisionTreeRegressor
+from sklearn.tree import DecisionTreeRegressor
+
+tree_reg = DecisionTreeRegressor(random_state=42)
+tree_reg.fit(housing_prepared, housing_labels)
+
+housing_predictions = tree_reg.predict(housing_prepared)
+tree_mse = mean_squared_error(housing_labels, housing_predictions)
+tree_rmse = np.sqrt(tree_mse)
+print_format(tree_rmse)
+
+# Fine-tune your model
+from sklearn.model_selection import cross_val_score
+
+
+def display_scores(scores):
+    print("Scores:", scores)
+    print("Mean:", scores.mean())
+    print("Standard deviation:", scores.std())
+
+
+scores = cross_val_score(tree_reg, housing_prepared, housing_labels, scoring="neg_mean_squared_error", cv=10)
+tree_rmse_scores = np.sqrt(-scores)
+print('=' * 120)
+print("DecisionTree Scores")
+display_scores(tree_rmse_scores)
+
+lin_scores = cross_val_score(lin_reg, housing_prepared, housing_labels, scoring="neg_mean_squared_error", cv=10)
+lin_rmse_scores = np.sqrt(-lin_scores)
+print('LinearRegression  Scores:')
+display_scores(lin_rmse_scores)
+
+# Random Forest
+from sklearn.ensemble import RandomForestRegressor
+
+forest_reg = RandomForestRegressor(n_estimators=10, random_state=42)
+forest_reg.fit(housing_prepared, housing_labels)
+housing_predictions = forest_reg.predict(housing_prepared)
+forest_mse = mean_squared_error(housing_labels, housing_predictions)
+forest_rmse = np.sqrt(forest_mse)
+print_format(forest_rmse)
+
+forest_scores = cross_val_score(forest_reg, housing_prepared, housing_labels, scoring="neg_mean_squared_error", cv=10)
+forest_rmse_scores = np.sqrt(-forest_scores)
+print('RandomFores Scores:')
+display_scores(forest_rmse_scores)
+
+scores = cross_val_score(lin_reg, housing_prepared, housing_labels, scoring="neg_mean_squared_error", cv=10)
+print_format(pd.Series(np.sqrt(-scores)).describe())
+
+# SVM
+
+from sklearn.svm import SVR
+
+svm_reg = SVR(kernel="linear")
+svm_reg.fit(housing_prepared, housing_labels)
+housing_predictions = svm_reg.predict(housing_prepared)
+svm_mse = mean_squared_error(housing_labels, housing_predictions)
+svm_rmse = np.sqrt(svm_mse)
+print_format(svm_rmse)
+
+# Grid Search
+from sklearn.model_selection import GridSearchCV
+
+param_grid = [
+    # try 12 (3×4) combinations of hyperparameters
+    {'n_estimators': [3, 10, 30], 'max_features': [2, 4, 6, 8]},
+    # then try 6 (2×3) combinations with bootstrap set as False
+    {'bootstrap': [False], 'n_estimators': [3, 10], 'max_features': [2, 3, 4]},
+]
+
+forest_reg = RandomForestRegressor(random_state=42)
+# train across 5 folds, that's a total of (12+6)*5=90 rounds of training
+grid_search = GridSearchCV(forest_reg, param_grid, cv=5, scoring='neg_mean_squared_error', return_train_score=True)
+grid_search.fit(housing_prepared, housing_labels)
+print_format(grid_search)
+
+print_format(grid_search.best_params_)
+
+print_format(grid_search.best_estimator_)
+
+print('=' * 120)
+cvres = grid_search.cv_results_
+for mean_score, params in zip(cvres["mean_test_score"], cvres["params"]):
+    print(np.sqrt(-mean_score), params)
+
+print_format(pd.DataFrame(grid_search.cv_results_))
+
+# Random Search
+from sklearn.model_selection import RandomizedSearchCV
+from scipy.stats import randint
+
+param_distribs = {
+    'n_estimators': randint(low=1, high=200),
+    'max_features': randint(low=1, high=8),
+}
+
+forest_reg = RandomForestRegressor(random_state=42)
+rnd_search = RandomizedSearchCV(forest_reg, param_distributions=param_distribs,
+                                n_iter=10, cv=5, scoring='neg_mean_squared_error', random_state=42)
+rnd_search.fit(housing_prepared, housing_labels)
+
+print('=' * 120)
+cvres = rnd_search.cv_results_
+for mean_score, params in zip(cvres["mean_test_score"], cvres["params"]):
+    print(np.sqrt(-mean_score), params)
+
+feature_importances = grid_search.best_estimator_.feature_importances_
+print_format(feature_importances)
+
+extra_attribs = ["rooms_per_hhold", "pop_per_hhold", "bedrooms_per_room"]
+# cat_encoder = cat_pipeline.named_steps["cat_encoder"] # old solution
+cat_encoder = full_pipeline.named_transformers_["cat"]
+cat_one_hot_attribs = list(cat_encoder.categories_[0])
+attributes = num_attribs + extra_attribs + cat_one_hot_attribs
+print_format(sorted(zip(feature_importances, attributes), reverse=True))
+
+final_model = grid_search.best_estimator_
+
+X_test = strat_test_set.drop("median_house_value", axis=1)
+y_test = strat_test_set["median_house_value"].copy()
+
+X_test_prepared = full_pipeline.transform(X_test)
+final_predictions = final_model.predict(X_test_prepared)
+
+final_mse = mean_squared_error(y_test, final_predictions)
+final_rmse = np.sqrt(final_mse)
+
+print_format(final_rmse)
+
+from scipy import stats
+
+confidence = 0.95
+squared_errors = (final_predictions - y_test) ** 2
+mean = squared_errors.mean()
+m = len(squared_errors)
+
+sq1 = np.sqrt(stats.t.interval(confidence, m - 1, loc=np.mean(squared_errors), scale=stats.sem(squared_errors)))
+print_format(sq1)
+
+tscore = stats.t.ppf((1 + confidence) / 2, df=m - 1)
+tmargin = tscore * squared_errors.std(ddof=1) / np.sqrt(m)
+sq2 = np.sqrt(mean - tmargin), np.sqrt(mean + tmargin)
+print_format(sq2)
+
+zscore = stats.norm.ppf((1 + confidence) / 2)
+zmargin = zscore * squared_errors.std(ddof=1) / np.sqrt(m)
+sq3 = np.sqrt(mean - zmargin), np.sqrt(mean + zmargin)
+print_format(sq3)
