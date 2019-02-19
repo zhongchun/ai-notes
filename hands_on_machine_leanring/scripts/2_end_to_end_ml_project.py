@@ -223,4 +223,112 @@ print('=========================================================================
 print(strat_train_set.head())
 
 # Discover and visualize the data to gain insights
+housing = strat_train_set.copy()
+housing.plot(kind="scatter", x="longitude", y="latitude")
+save_fig("bad_visualization_plot")
+plt.show()
+
+housing.plot(kind="scatter", x="longitude", y="latitude", alpha=0.1)
+save_fig("better_visualization_plot")
+plt.show()
+
+housing.plot(kind="scatter", x="longitude", y="latitude", alpha=0.4,
+             s=housing["population"] / 100, label="population", figsize=(10, 7),
+             c="median_house_value", cmap=plt.get_cmap("jet"), colorbar=True,
+             sharex=False)
+plt.legend()
+save_fig("housing_prices_scatterplot")
+plt.show()
+
+import matplotlib.image as mpimg
+
+california_img = mpimg.imread(PROJECT_ROOT_DIR + '/images/end_to_end_project/california.png')
+ax = housing.plot(kind="scatter", x="longitude", y="latitude", figsize=(10, 7),
+                  s=housing['population'] / 100, label="Population",
+                  c="median_house_value", cmap=plt.get_cmap("jet"),
+                  colorbar=False, alpha=0.4,
+                  )
+plt.imshow(california_img, extent=[-124.55, -113.80, 32.45, 42.05], alpha=0.5,
+           cmap=plt.get_cmap("jet"))
+plt.ylabel("Latitude", fontsize=14)
+plt.xlabel("Longitude", fontsize=14)
+
+prices = housing["median_house_value"]
+tick_values = np.linspace(prices.min(), prices.max(), 11)
+cbar = plt.colorbar()
+cbar.ax.set_yticklabels(["$%dk" % (round(v / 1000)) for v in tick_values], fontsize=14)
+cbar.set_label('Median House Value', fontsize=16)
+
+plt.legend(fontsize=16)
+save_fig("california_housing_prices_plot")
+plt.show()
+
+# Compute correlation coefficient
+# corr_matrix = housing.corr()
+# print('===============================================================================================================')
+# print(corr_matrix["median_house_value"].sort_values(ascending=False))
+"""
+Correlation coefficient
+median_house_value    1.000000
+median_income         0.687160
+total_rooms           0.135097
+housing_median_age    0.114110
+households            0.064506
+total_bedrooms        0.047689
+population           -0.026920
+longitude            -0.047432
+latitude             -0.142724
+Name: median_house_value, dtype: float64
+"""
+
+# from pandas.tools.plotting import scatter_matrix # For older versions of Pandas
+from pandas.plotting import scatter_matrix
+
+attributes = ["median_house_value", "median_income", "total_rooms", "housing_median_age"]
+scatter_matrix(housing[attributes], figsize=(12, 8))
+save_fig("scatter_matrix_plot")
+plt.show()
+
+housing.plot(kind="scatter", x="median_income", y="median_house_value", alpha=0.1)
+plt.axis([0, 16, 0, 550000])
+save_fig("income_vs_house_value_scatterplot")
+plt.show()
+
+# Generate some new features
+housing["rooms_per_household"] = housing["total_rooms"] / housing["households"]
+housing["bedrooms_per_room"] = housing["total_bedrooms"] / housing["total_rooms"]
+housing["population_per_household"] = housing["population"] / housing["households"]
+
+# Compute correlation coefficient
+# corr_matrix = housing.corr()
+# print('===============================================================================================================')
+# print(corr_matrix["median_house_value"].sort_values(ascending=False))
+"""
+median_house_value          1.000000
+median_income               0.687160
+rooms_per_household         0.146285
+total_rooms                 0.135097
+housing_median_age          0.114110
+households                  0.064506
+total_bedrooms              0.047689
+population_per_household   -0.021985
+population                 -0.026920
+longitude                  -0.047432
+latitude                   -0.142724
+bedrooms_per_room          -0.259984
+Name: median_house_value, dtype: float64
+"""
+
+housing.plot(kind="scatter", x="rooms_per_household", y="median_house_value",
+             alpha=0.2)
+plt.axis([0, 5, 0, 520000])
+plt.show()
+
+print('===============================================================================================================')
+print(housing.head())
+print('===============================================================================================================')
+print(housing.describe())
+
+# Prepare the data for Machine Learning algorithms
+
 
