@@ -62,11 +62,45 @@ When you are learning about Machine Learning it is best to actually experiment w
 
 ## Discover and Visualize the Data to Gain Insights
 
+### Visualizing Geographical Data
 
+### Looking for Correlations
 
+### Experimenting with Attribute Combinations
 
+## Prepare the Data for Machine Learning Algorithms
 
+###Data Cleaning
 
+### Handling Text and Categorical Attributes
+
+### Custom Transformers
+
+### Feature Scaling
+
+### Transformation Pipelines
+
+## Select and Train a Model
+
+At last! You framed the problem, you got the data and explored it, you sampled a training set and a test set, and you wrote transformation pipelines to clean up and prepare your data for Machine Learning algorithms automatically. You are now ready to select and train a Machine Learning model.
+
+### Training and Evaluating on the Training Set
+
+### Better Evaluation Using Cross-Validation
+
+## Fine-Tune Your Model
+
+### Grid Search
+
+### Randomized Search
+
+### Ensemble Methods
+
+### Analyze the Best Models and Their Errors
+
+### Evaluate Your System on the Test Set
+
+## Launch, Monitor, and Maintain Your System
 
 
 
