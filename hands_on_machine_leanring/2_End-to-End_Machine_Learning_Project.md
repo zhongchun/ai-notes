@@ -60,6 +60,8 @@ When you are learning about Machine Learning it is best to actually experiment w
 
 ### Create a Test Set
 
+## Discover and Visualize the Data to Gain Insights
+
 
 
 
