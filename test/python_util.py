@@ -17,9 +17,13 @@ import pandas as pd
 #     num = np.ceil(np.random.uniform(0, 10000))
 #     print(i, num)
 
-rand_data = np.random.randint(0, 10000, 200)
+rand_data = np.random.randint(0, 10000, 100000)
 # print(rand_data)
 # print(type(rand_data))
+
+n, bins, patches = plt.hist(rand_data, bins=50)
+plt.grid(True)
+plt.show()
 
 rand_data_frame = pd.DataFrame(rand_data)
 # print(rand_data_frame)
@@ -36,7 +40,3 @@ for index, value in enumerate(repeat_data):
         # print(index, value)
 
 print("count =", count)
-
-# n, bins, patches = plt.hist(rand_data, bins=40)
-# plt.grid(True)
-# plt.show()
