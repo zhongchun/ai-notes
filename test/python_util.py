@@ -17,7 +17,13 @@ import pandas as pd
 #     num = np.ceil(np.random.uniform(0, 10000))
 #     print(i, num)
 
-rand_data = np.random.randint(0, 10000, 100000)
+sum = 1000
+sum = 10000
+sum = 100000 # 10%
+sum = 1000000 # 1.0%
+sum = 10000000 # 0.1%
+# sum = 100000000 # 0.01%
+rand_data = np.random.randint(0, 10000, sum)
 # print(rand_data)
 # print(type(rand_data))
 
@@ -40,3 +46,4 @@ for index, value in enumerate(repeat_data):
         # print(index, value)
 
 print("count =", count)
+print("conflict rate = ", count/sum * 100, "%")
