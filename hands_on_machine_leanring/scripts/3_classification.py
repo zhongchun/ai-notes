@@ -171,3 +171,15 @@ class Never5Classifier(BaseEstimator):
 
 never_5_clf = Never5Classifier()
 print_format(cross_val_score(never_5_clf, X_train, y_train_5, cv=3, scoring="accuracy"))
+
+from sklearn.model_selection import cross_val_predict
+
+y_train_pred = cross_val_predict(sgd_clf, X_train, y_train_5, cv=3)
+
+from sklearn.metrics import confusion_matrix
+
+print_format(confusion_matrix(y_train_5, y_train_pred))
+
+y_train_perfect_predictions = y_train_5
+print_format(confusion_matrix(y_train_5, y_train_perfect_predictions))
+
