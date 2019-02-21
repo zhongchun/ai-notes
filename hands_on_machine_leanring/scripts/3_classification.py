@@ -9,40 +9,25 @@
  @Last Modified time: 2019-02-19 21:56
 """
 # To support both python 2 and python 3
-from __future__ import division, print_function, unicode_literals
+from __future__ import division, print_function, unicode_literals, absolute_import
 
-# Common imports
 import numpy as np
-import os
-
-# to make this notebook's output stable across runs
-np.random.seed(42)
-
-# To plot pretty figures
-# % matplotlib inline
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from sklearn.datasets import fetch_openml
+import pandas as pd
+from common.util import *
+
+# to make  output stable across runs
+np.random.seed(42)
 
 mpl.rc('axes', labelsize=14)
 mpl.rc('xtick', labelsize=12)
 mpl.rc('ytick', labelsize=12)
 
-# Where to save the figures
+# basic info
 PROJECT_ROOT_DIR = "."
 CHAPTER_ID = "classification"
-
-
-def print_format(v, length=120):
-    print('=' * length)
-    print(v)
-
-
-def save_fig(fig_id, tight_layout=True):
-    path = os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID, fig_id + ".png")
-    print("Saving figure: ", fig_id)
-    if tight_layout:
-        plt.tight_layout()
-    plt.savefig(path, format='png', dpi=300)
 
 
 def sort_by_target(mnist):
@@ -52,42 +37,6 @@ def sort_by_target(mnist):
     mnist.target[:60000] = mnist.target[reorder_train]
     mnist.data[60000:] = mnist.data[reorder_test + 60000]
     mnist.target[60000:] = mnist.target[reorder_test + 60000]
-
-
-try:
-    from sklearn.datasets import fetch_openml
-
-    mnist = fetch_openml('mnist_784', version=1, cache=True)
-    mnist.target = mnist.target.astype(np.int8)  # fetch_openml() returns targets as strings
-    # print_format(mnist)
-    # # test sort
-    # tmp = np.array(sorted([(target, i) for i, target in enumerate(mnist.target[:60000])]))
-    # print_format(tmp)
-    # print_format(tmp[:, 1])
-    # print_format(tmp[0])
-    sort_by_target(mnist)  # fetch_openml() returns an unsorted dataset
-except ImportError:
-    from sklearn.datasets import fetch_mldata
-
-    mnist = fetch_mldata('MNIST original')
-
-print_format(mnist)
-print_format(mnist["data"])
-print_format(mnist["target"])
-
-X, y = mnist["data"], mnist["target"]
-print_format(X.shape)
-print_format(y.shape)
-
-# Take a look at one digit from the dataset
-some_digit = X[36000]
-some_digit_image = some_digit.reshape(28, 28)
-plt.imshow(some_digit_image, cmap=mpl.cm.binary, interpolation="nearest")
-plt.axis("off")
-save_fig("some_digit_plot")
-plt.show()
-
-print_format(y[36000])
 
 
 # Plot some digits from the dataset
@@ -114,12 +63,44 @@ def plot_digits(instances, images_per_row=10, **options):
     plt.axis("off")
 
 
+mnist = fetch_openml('mnist_784', version=1, cache=True)
+mnist.target = mnist.target.astype(np.int8)  # fetch_openml() returns targets as strings
+sort_by_target(mnist)  # fetch_openml() returns an unsorted dataset
+
+print_line(mnist, name='mnist')
+print_line(mnist["data"], name='mnist["data"]')
+print_line(mnist["target"], name='mnist["target"]')
+
+X, y = mnist["data"], mnist["target"]
+print_line(X.shape, name='X.shape')
+print_line(y.shape, name='y.shape')
+
+# Take a look at one digit from the dataset
+some_digit = X[36000]
+some_digit_image = some_digit.reshape(28, 28)
+plt.imshow(some_digit_image, cmap=mpl.cm.binary, interpolation="nearest")
+plt.axis("off")
+save_fig("some_digit_plot", PROJECT_ROOT_DIR, CHAPTER_ID)
+plt.show()
+
+print_line(y[36000], 'y[36000]')
+
 plt.figure(figsize=(9, 9))
 example_images = np.r_[X[:12000:600], X[13000:30600:600], X[30600:60000:590]]
 plot_digits(example_images, images_per_row=10)
-save_fig("more_digits_plot")
+save_fig("more_digits_plot", PROJECT_ROOT_DIR, CHAPTER_ID)
 plt.show()
 
+y_data_frame = pd.DataFrame(y)
+print_line(y_data_frame[0].value_counts(), 'y_data_frame')
+
+print_line(X[:12000:600].shape, 'X[:12000:600],shape')
+print_line(X[13000:30600:600].shape, 'X[13000:30600:600].shape')
+print_line(X[30600:60000:590].shape, 'X[30600:60000:590],shape')
+print_line(example_images, 'example_images')
+print_line(example_images.shape, 'example_images.shape')
+
+# Get a train and test dataset
 X_train, X_test, y_train, y_test = X[:60000], X[60000:], y[:60000], y[60000:]
 shuffle_index = np.random.permutation(60000)
 X_train, y_train = X_train[shuffle_index], y_train[shuffle_index]
@@ -133,13 +114,13 @@ from sklearn.linear_model import SGDClassifier
 sgd_clf = SGDClassifier(max_iter=5, tol=-np.infty, random_state=42)
 sgd_clf.fit(X_train, y_train_5)
 
-print_format(sgd_clf)
+print_line(sgd_clf)
 
-print_format(sgd_clf.predict([some_digit]))
+print_line(sgd_clf.predict([some_digit]))
 
 from sklearn.model_selection import cross_val_score
 
-print_format(cross_val_score(sgd_clf, X_train, y_train_5, cv=3, scoring="accuracy"))
+print_line(cross_val_score(sgd_clf, X_train, y_train_5, cv=3, scoring="accuracy"))
 
 from sklearn.model_selection import StratifiedKFold
 from sklearn.base import clone
@@ -170,7 +151,7 @@ class Never5Classifier(BaseEstimator):
 
 
 never_5_clf = Never5Classifier()
-print_format(cross_val_score(never_5_clf, X_train, y_train_5, cv=3, scoring="accuracy"))
+print_line(cross_val_score(never_5_clf, X_train, y_train_5, cv=3, scoring="accuracy"))
 
 from sklearn.model_selection import cross_val_predict
 
@@ -178,29 +159,29 @@ y_train_pred = cross_val_predict(sgd_clf, X_train, y_train_5, cv=3)
 
 from sklearn.metrics import confusion_matrix
 
-print_format(confusion_matrix(y_train_5, y_train_pred))
+print_line(confusion_matrix(y_train_5, y_train_pred))
 
 y_train_perfect_predictions = y_train_5
-print_format(confusion_matrix(y_train_5, y_train_perfect_predictions))
+print_line(confusion_matrix(y_train_5, y_train_perfect_predictions))
 
 from sklearn.metrics import precision_score, recall_score, f1_score
 
-print_format(precision_score(y_train_5, y_train_pred))
-print_format(recall_score(y_train_5, y_train_pred))
-print_format(f1_score(y_train_5, y_train_pred))
+print_line(precision_score(y_train_5, y_train_pred))
+print_line(recall_score(y_train_5, y_train_pred))
+print_line(f1_score(y_train_5, y_train_pred))
 
 y_scores = sgd_clf.decision_function([some_digit])
-print_format(y_scores)
+print_line(y_scores)
 threshold = 0
 y_some_digit_pred = (y_scores > threshold)
-print_format(y_some_digit_pred)
+print_line(y_some_digit_pred)
 
 threshold = 200000
 y_some_digit_pred = (y_scores > threshold)
-print_format(y_some_digit_pred)
+print_line(y_some_digit_pred)
 
 y_scores = cross_val_predict(sgd_clf, X_train, y_train_5, cv=3, method="decision_function")
-print_format(y_scores.shape)
+print_line(y_scores.shape)
 
 # hack to work around issue #9589 in Scikit-Learn 0.19.0
 if y_scores.ndim == 2:
@@ -222,13 +203,13 @@ def plot_precision_recall_vs_threshold(precisions, recalls, thresholds):
 plt.figure(figsize=(8, 4))
 plot_precision_recall_vs_threshold(precisions, recalls, thresholds)
 plt.xlim([-700000, 700000])
-save_fig("precision_recall_vs_threshold_plot")
+save_fig("precision_recall_vs_threshold_plot", PROJECT_ROOT_DIR, CHAPTER_ID)
 plt.show()
 
 (y_train_pred == (y_scores > 0)).all()
 y_train_pred_90 = (y_scores > 70000)
-print_format(precision_score(y_train_5, y_train_pred_90))
-print_format(recall_score(y_train_5, y_train_pred_90))
+print_line(precision_score(y_train_5, y_train_pred_90))
+print_line(recall_score(y_train_5, y_train_pred_90))
 
 
 def plot_precision_vs_recall(precisions, recalls):
@@ -240,5 +221,47 @@ def plot_precision_vs_recall(precisions, recalls):
 
 plt.figure(figsize=(8, 6))
 plot_precision_vs_recall(precisions, recalls)
-save_fig("precision_vs_recall_plot")
+save_fig("precision_vs_recall_plot", PROJECT_ROOT_DIR, CHAPTER_ID)
 plt.show()
+
+# ROC
+from sklearn.metrics import roc_curve
+
+fpr, tpr, thresholds = roc_curve(y_train_5, y_scores)
+
+
+def plot_roc_curve(fpr, tpr, label=None):
+    plt.plot(fpr, tpr, linewidth=2, label=label)
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.axis([0, 1, 0, 1])
+    plt.xlabel('False Positive Rate', fontsize=16)
+    plt.ylabel('True Positive Rate', fontsize=16)
+
+
+plt.figure(figsize=(8, 6))
+plot_roc_curve(fpr, tpr)
+save_fig("roc_curve_plot", PROJECT_ROOT_DIR, CHAPTER_ID)
+plt.show()
+
+from sklearn.metrics import roc_auc_score
+
+print_line(roc_auc_score(y_train_5, y_scores))
+
+from sklearn.ensemble import RandomForestClassifier
+
+forest_clf = RandomForestClassifier(n_estimators=10, random_state=42)
+y_probas_forest = cross_val_predict(forest_clf, X_train, y_train_5, cv=3, method="predict_proba")
+y_scores_forest = y_probas_forest[:, 1]  # score = proba of positive class
+fpr_forest, tpr_forest, thresholds_forest = roc_curve(y_train_5, y_scores_forest)
+
+plt.figure(figsize=(8, 6))
+plt.plot(fpr, tpr, "b:", linewidth=2, label="SGD")
+plot_roc_curve(fpr_forest, tpr_forest, "Random Forest")
+plt.legend(loc="lower right", fontsize=16)
+save_fig("roc_curve_comparison_plot", PROJECT_ROOT_DIR, CHAPTER_ID)
+plt.show()
+
+print_line(roc_auc_score(y_train_5, y_scores_forest))
+y_train_pred_forest = cross_val_predict(forest_clf, X_train, y_train_5, cv=3)
+print_line(precision_score(y_train_5, y_train_pred_forest))
+print_line(recall_score(y_train_5, y_train_pred_forest))
