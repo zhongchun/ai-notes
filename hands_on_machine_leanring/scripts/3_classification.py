@@ -16,6 +16,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from sklearn.datasets import fetch_openml
 import pandas as pd
+import sys
 from common.util import *
 
 # to make output stable across runs
@@ -113,13 +114,16 @@ X_train, y_train = X_train[shuffle_index], y_train[shuffle_index]
 y_train_5 = (y_train == 5)
 y_test_5 = (y_test == 5)
 
+print_line(y_train_5.shape)
+print_line(y_train_5)
+
+# Test some model
 from sklearn.linear_model import SGDClassifier
 
 sgd_clf = SGDClassifier(max_iter=5, tol=-np.infty, random_state=42)
 sgd_clf.fit(X_train, y_train_5)
 
 print_line(sgd_clf)
-
 print_line(sgd_clf.predict([some_digit]))
 
 from sklearn.model_selection import cross_val_score

@@ -13,12 +13,14 @@ import numpy as np
 import matplotlib.pylab as plt
 import pandas as pd
 
+import sys
+
 # for i in range(1, 1001):
 #     num = np.ceil(np.random.uniform(0, 10000))
 #     print(i, num)
 
-sum = 1000      # 3.69%
-sum = 10000     # 36.33%
+sum = 1000  # 3.69%
+sum = 10000  # 36.33%
 # sum = 20000     # 56.68%
 # sum = 30000     # 68.35%
 # sum = 100000    # 90%
@@ -71,9 +73,10 @@ images.append(np.zeros((size, size * 9)))
 print(len(images))
 print(images[100].shape)
 
-rimages = images[0: 1*10]
+rimages = images[0: 1 * 10]
 print(type(rimages))
 print(rimages[0].shape)
 it = np.concatenate(rimages, axis=1)
 print(it.shape)
 
+sys.exit()
