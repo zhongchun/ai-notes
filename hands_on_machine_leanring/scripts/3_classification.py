@@ -273,3 +273,35 @@ print_line(roc_auc_score(y_train_5, y_scores_forest))
 y_train_pred_forest = cross_val_predict(forest_clf, X_train, y_train_5, cv=3)
 print_line(precision_score(y_train_5, y_train_pred_forest))
 print_line(recall_score(y_train_5, y_train_pred_forest))
+
+# Multiclass classification
+sgd_clf.fit(X_train, y_train)
+print_line(sgd_clf.predict([some_digit]))
+
+some_digit_scores = sgd_clf.decision_function([some_digit])
+max_index = np.argmax(some_digit_scores)
+print_line(some_digit_scores, name='some_digit_scores')
+print_line(max_index, name='max_index')
+print_line(sgd_clf.classes_, name='sgd_clf.classes_')
+print_line(sgd_clf.classes_[5], name='sgd_clf.classes_[5]')
+
+from sklearn.multiclass import OneVsOneClassifier
+
+ovo_clf = OneVsOneClassifier(SGDClassifier(max_iter=5, tol=-np.infty, random_state=42))
+ovo_clf.fit(X_train, y_train)
+print_line(ovo_clf.predict([some_digit]), name='predicted som_digit')
+print_line(len(ovo_clf.estimators_), name='len(ovo_clf.estimators_)')
+
+forest_clf.fit(X_train, y_train)
+print_line(forest_clf.predict([some_digit]), name='predicted som_digit')
+print_line(forest_clf.predict_proba([some_digit]), name='forest predict probabilities')
+
+sgd_scores = cross_val_score(sgd_clf, X_train, y_train, cv=3, scoring="accuracy")
+print_line(sgd_scores, name='sgd_scores')
+
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train.astype(np.float64))
+sgd_scaled_scores = cross_val_score(sgd_clf, X_train_scaled, y_train, cv=3, scoring="accuracy")
+print_line(sgd_scaled_scores, name='sgd_scaled_scores')

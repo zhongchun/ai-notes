@@ -24,9 +24,12 @@
     - SVM
     - Decision Tree
     - Random Forest: SGDClassifier
+    - naive Bayes classifiers
 
 5. Scikit-Learn Design
 - Consistency: All objects share a consistent and simple interface
     - Estimators
     - Transformers
     - Predictors
+
+6. 各算法原理

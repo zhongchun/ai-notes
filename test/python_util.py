@@ -79,4 +79,11 @@ print(rimages[0].shape)
 it = np.concatenate(rimages, axis=1)
 print(it.shape)
 
+tmp = np.random.randint(20, size=(3, 4))
+print(tmp)
+print(type(tmp[0][0]))
+
+tmp_scaled = tmp.astype(np.float64)
+print(tmp_scaled)
+print(type(tmp_scaled[0][0]))
 sys.exit()
