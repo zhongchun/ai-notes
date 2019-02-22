@@ -97,15 +97,20 @@ def load_housing_data(housing_path=HOUSING_PATH):
 
 
 housing = load_housing_data()
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing.head(10))
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing.info())
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing["ocean_proximity"].value_counts())
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing.describe())
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 
 import matplotlib.pyplot as plt
 
@@ -151,24 +156,29 @@ def test_set_check(identifier, test_ratio, hash=hashlib.md5):
 
 housing_with_id = housing.reset_index()  # adds an `index` column
 train_set, test_set = split_train_test_by_id(housing_with_id, 0.2, "index")
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(train_set.head())
 
 housing_with_id["id"] = housing["longitude"] * 1000 + housing["latitude"]
 train_set, test_set = split_train_test_by_id(housing_with_id, 0.2, "id")
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(train_set.head())
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(test_set.head())
 
 # sklearn train_test_split
 from sklearn.model_selection import train_test_split
 
 train_set, test_set = train_test_split(housing, test_size=0.2, random_state=42)
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(train_set.head())
 
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 housing["median_income"].hist()
 plt.show()
 
@@ -176,9 +186,11 @@ plt.show()
 housing["income_cat"] = np.ceil(housing["median_income"] / 1.5)
 # Label those above 5 as 5
 housing["income_cat"].where(housing["income_cat"] < 5, 5.0, inplace=True)
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing["income_cat"].value_counts())
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing.head())
 
 housing["income_cat"].hist()
@@ -191,15 +203,18 @@ for train_index, test_index in split.split(housing, housing["income_cat"]):
     strat_train_set = housing.loc[train_index]
     strat_test_set = housing.loc[test_index]
 
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print('All data income_cat distribution')
 print(housing["income_cat"].value_counts() / len(housing))
 
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print('Train data income_cat distribution')
 print(strat_train_set["income_cat"].value_counts() / len(strat_train_set))
 
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print('Test data income_cat distribution')
 print(strat_test_set["income_cat"].value_counts() / len(strat_test_set))
 
@@ -215,16 +230,20 @@ compare_props = pd.DataFrame({
     "Stratified": income_cat_proportions(strat_test_set),
     "Random": income_cat_proportions(test_set),
 }).sort_index()
-compare_props["Rand. %error"] = 100 * compare_props["Random"] / compare_props["Overall"] - 100
-compare_props["Strat. %error"] = 100 * compare_props["Stratified"] / compare_props["Overall"] - 100
+compare_props["Rand. %error"] = 100 * compare_props["Random"] / compare_props[
+    "Overall"] - 100
+compare_props["Strat. %error"] = 100 * compare_props["Stratified"] / \
+                                 compare_props["Overall"] - 100
 
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(compare_props)
 
 for set_ in (strat_train_set, strat_test_set):
     set_.drop("income_cat", axis=1, inplace=True)
 
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(strat_train_set.head())
 
 # Discover and visualize the data to gain insights
@@ -247,7 +266,8 @@ plt.show()
 
 import matplotlib.image as mpimg
 
-california_img = mpimg.imread(PROJECT_ROOT_DIR + '/images/end_to_end_project/california.png')
+california_img = mpimg.imread(
+    PROJECT_ROOT_DIR + '/images/end_to_end_project/california.png')
 ax = housing.plot(kind="scatter", x="longitude", y="latitude", figsize=(10, 7),
                   s=housing['population'] / 100, label="Population",
                   c="median_house_value", cmap=plt.get_cmap("jet"),
@@ -261,7 +281,8 @@ plt.xlabel("Longitude", fontsize=14)
 prices = housing["median_house_value"]
 tick_values = np.linspace(prices.min(), prices.max(), 11)
 cbar = plt.colorbar()
-cbar.ax.set_yticklabels(["$%dk" % (round(v / 1000)) for v in tick_values], fontsize=14)
+cbar.ax.set_yticklabels(["$%dk" % (round(v / 1000)) for v in tick_values],
+                        fontsize=14)
 cbar.set_label('Median House Value', fontsize=16)
 
 plt.legend(fontsize=16)
@@ -289,20 +310,24 @@ Name: median_house_value, dtype: float64
 # from pandas.tools.plotting import scatter_matrix # For older versions of Pandas
 from pandas.plotting import scatter_matrix
 
-attributes = ["median_house_value", "median_income", "total_rooms", "housing_median_age"]
+attributes = ["median_house_value", "median_income", "total_rooms",
+              "housing_median_age"]
 scatter_matrix(housing[attributes], figsize=(12, 8))
 save_fig("scatter_matrix_plot")
 plt.show()
 
-housing.plot(kind="scatter", x="median_income", y="median_house_value", alpha=0.1)
+housing.plot(kind="scatter", x="median_income", y="median_house_value",
+             alpha=0.1)
 plt.axis([0, 16, 0, 550000])
 save_fig("income_vs_house_value_scatterplot")
 plt.show()
 
 # Generate some new features
 housing["rooms_per_household"] = housing["total_rooms"] / housing["households"]
-housing["bedrooms_per_room"] = housing["total_bedrooms"] / housing["total_rooms"]
-housing["population_per_household"] = housing["population"] / housing["households"]
+housing["bedrooms_per_room"] = housing["total_bedrooms"] / housing[
+    "total_rooms"]
+housing["population_per_household"] = housing["population"] / housing[
+    "households"]
 
 # Compute correlation coefficient
 # corr_matrix = housing.corr()
@@ -329,21 +354,27 @@ housing.plot(kind="scatter", x="rooms_per_household", y="median_house_value",
 plt.axis([0, 5, 0, 520000])
 plt.show()
 
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing.head())
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing.describe())
 
 # Prepare the data for Machine Learning algorithms
-housing = strat_train_set.drop("median_house_value", axis=1)  # drop labels for training set
+housing = strat_train_set.drop("median_house_value",
+                               axis=1)  # drop labels for training set
 housing_labels = strat_train_set["median_house_value"].copy()
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing.head())
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing_labels.head())
 
 sample_incomplete_rows = housing[housing.isnull().any(axis=1)].head()
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(sample_incomplete_rows)
 
 # Process null value
@@ -351,13 +382,17 @@ print(sample_incomplete_rows)
 # sample_incomplete_rows.drop("total_bedrooms", axis=1) # option 2
 
 median = housing["total_bedrooms"].median()
-sample_incomplete_rows["total_bedrooms"].fillna(median, inplace=True)  # option 3
-print('===============================================================================================================')
+sample_incomplete_rows["total_bedrooms"].fillna(median,
+                                                inplace=True)  # option 3
+print(
+    '===============================================================================================================')
 print(sample_incomplete_rows)
 
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing.head())
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing.info())
 
 # Use sklearn to process null value
@@ -370,27 +405,34 @@ imputer = SimpleImputer(strategy="median")
 housing_num = housing.drop('ocean_proximity', axis=1)
 
 imputer.fit(housing_num)
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(imputer.statistics_)
 print(housing_num.median().values)
 
 X = imputer.transform(housing_num)
-housing_tr = pd.DataFrame(X, columns=housing_num.columns, index=list(housing.index.values))
+housing_tr = pd.DataFrame(X, columns=housing_num.columns,
+                          index=list(housing.index.values))
 
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing_tr.loc[sample_incomplete_rows.index.values])
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(imputer.strategy)
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing_tr.head())
 
 housing_tr = pd.DataFrame(X, columns=housing_num.columns)
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing_tr.head())
 
 # Handling Text and Categorical Attributes
 housing_cat = housing[['ocean_proximity']]
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing_cat.head(10))
 
 try:
@@ -400,24 +442,28 @@ except ImportError:
 
 ordinal_encoder = OrdinalEncoder()
 housing_cat_encoded = ordinal_encoder.fit_transform(housing_cat)
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing_cat_encoded[:10])
 print(ordinal_encoder.categories_)
 
 try:
-    from sklearn.preprocessing import OrdinalEncoder  # just to raise an ImportError if Scikit-Learn < 0.20
+    from sklearn.preprocessing import \
+        OrdinalEncoder  # just to raise an ImportError if Scikit-Learn < 0.20
     from sklearn.preprocessing import OneHotEncoder
 except ImportError:
     from future_encoders import OneHotEncoder  # Scikit-Learn < 0.20
 
 cat_encoder = OneHotEncoder()
 housing_cat_1hot = cat_encoder.fit_transform(housing_cat)
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 # housing_cat_1hot
 print(housing_cat_1hot.toarray())
 print(cat_encoder.categories_)
 
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing.columns)
 
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -469,8 +515,10 @@ housing_extra_attribs = attr_adder.fit_transform(housing.values)
 
 housing_extra_attribs = pd.DataFrame(
     housing_extra_attribs,
-    columns=list(housing.columns) + ["rooms_per_household", "population_per_household"])
-print('===============================================================================================================')
+    columns=list(housing.columns) + ["rooms_per_household",
+                                     "population_per_household"])
+print(
+    '===============================================================================================================')
 print(housing_extra_attribs.head())
 
 #  Build a pipeline for preprocessing the numerical attributes
@@ -484,7 +532,8 @@ num_pipeline = Pipeline([
 ])
 
 housing_num_tr = num_pipeline.fit_transform(housing_num)
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing_num_tr)
 print(housing_num_tr.shape)
 
@@ -502,7 +551,8 @@ full_pipeline = ColumnTransformer([
 ])
 
 housing_prepared = full_pipeline.fit_transform(housing)
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(housing_prepared)
 print(housing_prepared.shape)
 
@@ -517,7 +567,8 @@ lin_reg.fit(housing_prepared, housing_labels)
 some_data = housing.iloc[:5]
 some_labels = housing_labels.iloc[:5]
 some_data_prepared = full_pipeline.transform(some_data)
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(some_data_prepared)
 print(some_data_prepared.shape)
 print("Predictions:", lin_reg.predict(some_data_prepared))
@@ -528,7 +579,8 @@ from sklearn.metrics import mean_squared_error
 housing_predictions = lin_reg.predict(housing_prepared)
 lin_mse = mean_squared_error(housing_labels, housing_predictions)
 lin_rmse = np.sqrt(lin_mse)
-print('===============================================================================================================')
+print(
+    '===============================================================================================================')
 print(lin_rmse)
 
 from sklearn.metrics import mean_absolute_error
@@ -557,13 +609,15 @@ def display_scores(scores):
     print("Standard deviation:", scores.std())
 
 
-scores = cross_val_score(tree_reg, housing_prepared, housing_labels, scoring="neg_mean_squared_error", cv=10)
+scores = cross_val_score(tree_reg, housing_prepared, housing_labels,
+                         scoring="neg_mean_squared_error", cv=10)
 tree_rmse_scores = np.sqrt(-scores)
 print('=' * 120)
 print("DecisionTree Scores")
 display_scores(tree_rmse_scores)
 
-lin_scores = cross_val_score(lin_reg, housing_prepared, housing_labels, scoring="neg_mean_squared_error", cv=10)
+lin_scores = cross_val_score(lin_reg, housing_prepared, housing_labels,
+                             scoring="neg_mean_squared_error", cv=10)
 lin_rmse_scores = np.sqrt(-lin_scores)
 print('LinearRegression  Scores:')
 display_scores(lin_rmse_scores)
@@ -578,12 +632,14 @@ forest_mse = mean_squared_error(housing_labels, housing_predictions)
 forest_rmse = np.sqrt(forest_mse)
 print_format(forest_rmse)
 
-forest_scores = cross_val_score(forest_reg, housing_prepared, housing_labels, scoring="neg_mean_squared_error", cv=10)
+forest_scores = cross_val_score(forest_reg, housing_prepared, housing_labels,
+                                scoring="neg_mean_squared_error", cv=10)
 forest_rmse_scores = np.sqrt(-forest_scores)
 print('RandomFores Scores:')
 display_scores(forest_rmse_scores)
 
-scores = cross_val_score(lin_reg, housing_prepared, housing_labels, scoring="neg_mean_squared_error", cv=10)
+scores = cross_val_score(lin_reg, housing_prepared, housing_labels,
+                         scoring="neg_mean_squared_error", cv=10)
 print_format(pd.Series(np.sqrt(-scores)).describe())
 
 # SVM
@@ -609,7 +665,9 @@ param_grid = [
 
 forest_reg = RandomForestRegressor(random_state=42)
 # train across 5 folds, that's a total of (12+6)*5=90 rounds of training
-grid_search = GridSearchCV(forest_reg, param_grid, cv=5, scoring='neg_mean_squared_error', return_train_score=True)
+grid_search = GridSearchCV(forest_reg, param_grid, cv=5,
+                           scoring='neg_mean_squared_error',
+                           return_train_score=True)
 grid_search.fit(housing_prepared, housing_labels)
 print_format(grid_search)
 
@@ -635,7 +693,9 @@ param_distribs = {
 
 forest_reg = RandomForestRegressor(random_state=42)
 rnd_search = RandomizedSearchCV(forest_reg, param_distributions=param_distribs,
-                                n_iter=10, cv=5, scoring='neg_mean_squared_error', random_state=42)
+                                n_iter=10, cv=5,
+                                scoring='neg_mean_squared_error',
+                                random_state=42)
 rnd_search.fit(housing_prepared, housing_labels)
 
 print('=' * 120)
@@ -673,7 +733,8 @@ squared_errors = (final_predictions - y_test) ** 2
 mean = squared_errors.mean()
 m = len(squared_errors)
 
-sq1 = np.sqrt(stats.t.interval(confidence, m - 1, loc=np.mean(squared_errors), scale=stats.sem(squared_errors)))
+sq1 = np.sqrt(stats.t.interval(confidence, m - 1, loc=np.mean(squared_errors),
+                               scale=stats.sem(squared_errors)))
 print_format(sq1)
 
 tscore = stats.t.ppf((1 + confidence) / 2, df=m - 1)

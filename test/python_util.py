@@ -86,4 +86,21 @@ print(type(tmp[0][0]))
 tmp_scaled = tmp.astype(np.float64)
 print(tmp_scaled)
 print(type(tmp_scaled[0][0]))
+
+row_sums_1 = tmp.sum(axis=1, keepdims=False)
+print(row_sums_1)
+print(row_sums_1.shape)
+
+row_sums_2 = tmp.sum(axis=1, keepdims=True)
+print(row_sums_2)
+print(row_sums_2.shape)
+
+norm_tmp = tmp / row_sums_2
+print(norm_tmp.shape)
+print(norm_tmp)
+
+np.fill_diagonal(norm_tmp, 0)
+print(norm_tmp.shape)
+print(norm_tmp)
+
 sys.exit()

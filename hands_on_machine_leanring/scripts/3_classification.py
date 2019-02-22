@@ -9,7 +9,8 @@
  @Last Modified time: 2019-02-19 21:56
 """
 # To support both python 2 and python 3
-from __future__ import division, print_function, unicode_literals, absolute_import
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
 
 import numpy as np
 import matplotlib as mpl
@@ -32,8 +33,12 @@ CHAPTER_ID = "classification"
 
 
 def sort_by_target(mnist):
-    reorder_train = np.array(sorted([(target, i) for i, target in enumerate(mnist.target[:60000])]))[:, 1]
-    reorder_test = np.array(sorted([(target, i) for i, target in enumerate(mnist.target[60000:])]))[:, 1]
+    reorder_train = np.array(
+        sorted([(target, i) for i, target in enumerate(mnist.target[:60000])]))[
+                    :, 1]
+    reorder_test = np.array(
+        sorted([(target, i) for i, target in enumerate(mnist.target[60000:])]))[
+                   :, 1]
     mnist.data[:60000] = mnist.data[reorder_train]
     mnist.target[:60000] = mnist.target[reorder_train]
     mnist.data[60000:] = mnist.data[reorder_test + 60000]
@@ -68,7 +73,8 @@ def plot_digits(instances, images_per_row=10, **options):
 
 # Get the data
 mnist = fetch_openml('mnist_784', version=1, cache=True)
-mnist.target = mnist.target.astype(np.int8)  # fetch_openml() returns targets as strings
+mnist.target = mnist.target.astype(
+    np.int8)  # fetch_openml() returns targets as strings
 sort_by_target(mnist)  # fetch_openml() returns an unsorted dataset
 
 # Take a look at one digit from the dataset
@@ -128,7 +134,8 @@ print_line(sgd_clf.predict([some_digit]))
 
 from sklearn.model_selection import cross_val_score
 
-print_line(cross_val_score(sgd_clf, X_train, y_train_5, cv=3, scoring="accuracy"))
+print_line(
+    cross_val_score(sgd_clf, X_train, y_train_5, cv=3, scoring="accuracy"))
 
 from sklearn.model_selection import StratifiedKFold
 from sklearn.base import clone
@@ -159,7 +166,8 @@ class Never5Classifier(BaseEstimator):
 
 
 never_5_clf = Never5Classifier()
-print_line(cross_val_score(never_5_clf, X_train, y_train_5, cv=3, scoring="accuracy"))
+print_line(
+    cross_val_score(never_5_clf, X_train, y_train_5, cv=3, scoring="accuracy"))
 
 from sklearn.model_selection import cross_val_predict
 
@@ -188,7 +196,8 @@ threshold = 200000
 y_some_digit_pred = (y_scores > threshold)
 print_line(y_some_digit_pred)
 
-y_scores = cross_val_predict(sgd_clf, X_train, y_train_5, cv=3, method="decision_function")
+y_scores = cross_val_predict(sgd_clf, X_train, y_train_5, cv=3,
+                             method="decision_function")
 print_line(y_scores.shape)
 
 # hack to work around issue #9589 in Scikit-Learn 0.19.0
@@ -258,9 +267,11 @@ print_line(roc_auc_score(y_train_5, y_scores))
 from sklearn.ensemble import RandomForestClassifier
 
 forest_clf = RandomForestClassifier(n_estimators=10, random_state=42)
-y_probas_forest = cross_val_predict(forest_clf, X_train, y_train_5, cv=3, method="predict_proba")
+y_probas_forest = cross_val_predict(forest_clf, X_train, y_train_5, cv=3,
+                                    method="predict_proba")
 y_scores_forest = y_probas_forest[:, 1]  # score = proba of positive class
-fpr_forest, tpr_forest, thresholds_forest = roc_curve(y_train_5, y_scores_forest)
+fpr_forest, tpr_forest, thresholds_forest = roc_curve(y_train_5,
+                                                      y_scores_forest)
 
 plt.figure(figsize=(8, 6))
 plt.plot(fpr, tpr, "b:", linewidth=2, label="SGD")
@@ -287,21 +298,117 @@ print_line(sgd_clf.classes_[5], name='sgd_clf.classes_[5]')
 
 from sklearn.multiclass import OneVsOneClassifier
 
-ovo_clf = OneVsOneClassifier(SGDClassifier(max_iter=5, tol=-np.infty, random_state=42))
+ovo_clf = OneVsOneClassifier(
+    SGDClassifier(max_iter=5, tol=-np.infty, random_state=42))
 ovo_clf.fit(X_train, y_train)
 print_line(ovo_clf.predict([some_digit]), name='predicted som_digit')
 print_line(len(ovo_clf.estimators_), name='len(ovo_clf.estimators_)')
 
 forest_clf.fit(X_train, y_train)
 print_line(forest_clf.predict([some_digit]), name='predicted som_digit')
-print_line(forest_clf.predict_proba([some_digit]), name='forest predict probabilities')
+print_line(forest_clf.predict_proba([some_digit]),
+           name='forest predict probabilities')
 
-sgd_scores = cross_val_score(sgd_clf, X_train, y_train, cv=3, scoring="accuracy")
+sgd_scores = cross_val_score(sgd_clf, X_train, y_train, cv=3,
+                             scoring="accuracy")
 print_line(sgd_scores, name='sgd_scores')
 
 from sklearn.preprocessing import StandardScaler
 
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train.astype(np.float64))
-sgd_scaled_scores = cross_val_score(sgd_clf, X_train_scaled, y_train, cv=3, scoring="accuracy")
+sgd_scaled_scores = cross_val_score(sgd_clf, X_train_scaled, y_train, cv=3,
+                                    scoring="accuracy")
 print_line(sgd_scaled_scores, name='sgd_scaled_scores')
+
+# Analysis Errors
+y_train_pred = cross_val_predict(sgd_clf, X_train_scaled, y_train, cv=3)
+conf_mx = confusion_matrix(y_train, y_train_pred)
+print_line(conf_mx)
+
+
+def plot_confusion_matrix(matrix):
+    """If you prefer color and a colorbar"""
+    fig = plt.figure(figsize=(8, 8))
+    ax = fig.add_subplot(111)
+    cax = ax.matshow(matrix)
+    fig.colorbar(cax)
+
+
+plt.matshow(conf_mx, cmap=plt.cm.gray)
+save_fig("confusion_matrix_plot", project_root_dir=PROJECT_ROOT_DIR,
+         chapter_id=CHAPTER_ID,
+         tight_layout=False)
+plt.show()
+
+row_sums = conf_mx.sum(axis=1, keepdims=True)
+norm_conf_mx = conf_mx / row_sums
+np.fill_diagonal(norm_conf_mx, 0)
+plt.matshow(norm_conf_mx, cmap=plt.cm.gray)
+save_fig("confusion_matrix_errors_plot", project_root_dir=PROJECT_ROOT_DIR,
+         chapter_id=CHAPTER_ID,
+         tight_layout=False)
+plt.show()
+
+cl_a, cl_b = 3, 5
+X_aa = X_train[(y_train == cl_a) & (y_train_pred == cl_a)]
+X_ab = X_train[(y_train == cl_a) & (y_train_pred == cl_b)]
+X_ba = X_train[(y_train == cl_b) & (y_train_pred == cl_a)]
+X_bb = X_train[(y_train == cl_b) & (y_train_pred == cl_b)]
+
+plt.figure(figsize=(8, 8))
+plt.subplot(221);
+plot_digits(X_aa[:25], images_per_row=5)
+plt.subplot(222);
+plot_digits(X_ab[:25], images_per_row=5)
+plt.subplot(223);
+plot_digits(X_ba[:25], images_per_row=5)
+plt.subplot(224);
+plot_digits(X_bb[:25], images_per_row=5)
+save_fig("error_analysis_digits_plot", project_root_dir=PROJECT_ROOT_DIR,
+         chapter_id=CHAPTER_ID)
+plt.show()
+
+# Multilabel Classification
+from sklearn.neighbors import KNeighborsClassifier
+
+y_train_large = (y_train >= 7)
+y_train_odd = (y_train % 2 == 1)
+y_multilabel = np.c_[y_train_large, y_train_odd]
+
+print_line(y_train_large.shape, name='y_train_large.shape')
+print_line(y_train_odd.shape, name='y_train_odd.shape')
+print_line(y_multilabel.shape, name='y_multilabel.shape')
+
+knn_clf = KNeighborsClassifier()
+knn_clf.fit(X_train, y_multilabel)
+print_line(knn_clf.predict([some_digit]), 'knn_clf.predict([some_digit])')
+
+y_train_knn_pred = cross_val_predict(knn_clf, X_train, y_multilabel, cv=3,
+                                     n_jobs=-1)
+knn_pred_score = f1_score(y_multilabel, y_train_knn_pred, average="macro")
+print_line(knn_pred_score, name='knn_pred_score')
+
+# Multioutput Classification
+noise = np.random.randint(0, 100, (len(X_train), 784))
+X_train_mod = X_train + noise
+noise = np.random.randint(0, 100, (len(X_test), 784))
+X_test_mod = X_test + noise
+y_train_mod = X_train
+y_test_mod = X_test
+
+some_index = 5500
+plt.subplot(121)
+plot_digit(X_test_mod[some_index])
+plt.subplot(122)
+plot_digit(y_test_mod[some_index])
+save_fig("noisy_digit_example_plot", project_root_dir=PROJECT_ROOT_DIR,
+         chapter_id=CHAPTER_ID)
+plt.show()
+
+knn_clf.fit(X_train_mod, y_train_mod)
+clean_digit = knn_clf.predict([X_test_mod[some_index]])
+plot_digit(clean_digit)
+save_fig("cleaned_digit_example_plot", project_root_dir=PROJECT_ROOT_DIR,
+         chapter_id=CHAPTER_ID)
+plot.show()
