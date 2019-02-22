@@ -19,8 +19,8 @@ import pandas as pd
 
 sum = 1000      # 3.69%
 sum = 10000     # 36.33%
-sum = 20000     # 56.68%
-sum = 30000     # 68.35%
+# sum = 20000     # 56.68%
+# sum = 30000     # 68.35%
 # sum = 100000    # 90%
 # sum = 1000000   # 99.0%
 # sum = 10000000  # 99.9%
@@ -29,9 +29,10 @@ rand_data = np.random.randint(0, 10000, sum)
 # print(rand_data)
 # print(type(rand_data))
 
-n, bins, patches = plt.hist(rand_data, bins=50)
-plt.grid(True)
-plt.show()
+# plot a hist figure
+# n, bins, patches = plt.hist(rand_data, bins=50)
+# plt.grid(True)
+# plt.show()
 
 rand_data_frame = pd.DataFrame(rand_data)
 # print(rand_data_frame)
@@ -49,3 +50,30 @@ for index, value in enumerate(repeat_data):
 
 print("count =", count)
 print("conflict rate = ", count / sum * 100, "%")
+
+size = 28
+instances = np.zeros((100, 784))
+images = [instance.reshape(size, size) for instance in instances]
+
+print(type(instances))
+print(instances.shape)
+print(len(instances))
+
+print(type(images))
+print(len(images))
+print(type(images[0]))
+print(images[0].shape)
+
+tmp = np.zeros((28, 28 * 9))
+print(tmp.shape)
+
+images.append(np.zeros((size, size * 9)))
+print(len(images))
+print(images[100].shape)
+
+rimages = images[0: 1*10]
+print(type(rimages))
+print(rimages[0].shape)
+it = np.concatenate(rimages, axis=1)
+print(it.shape)
+

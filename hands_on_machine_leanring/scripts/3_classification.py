@@ -18,7 +18,7 @@ from sklearn.datasets import fetch_openml
 import pandas as pd
 from common.util import *
 
-# to make  output stable across runs
+# to make output stable across runs
 np.random.seed(42)
 
 mpl.rc('axes', labelsize=14)
@@ -59,14 +59,18 @@ def plot_digits(instances, images_per_row=10, **options):
         rimages = images[row * images_per_row: (row + 1) * images_per_row]
         row_images.append(np.concatenate(rimages, axis=1))
     image = np.concatenate(row_images, axis=0)
+    print_line(row_images[0].shape, name='row_images[0].shape')
+    print_line(image.shape, name='image.shape')
     plt.imshow(image, cmap=mpl.cm.binary, **options)
     plt.axis("off")
 
 
+# Get the data
 mnist = fetch_openml('mnist_784', version=1, cache=True)
 mnist.target = mnist.target.astype(np.int8)  # fetch_openml() returns targets as strings
 sort_by_target(mnist)  # fetch_openml() returns an unsorted dataset
 
+# Take a look at one digit from the dataset
 print_line(mnist, name='mnist')
 print_line(mnist["data"], name='mnist["data"]')
 print_line(mnist["target"], name='mnist["target"]')
@@ -75,7 +79,6 @@ X, y = mnist["data"], mnist["target"]
 print_line(X.shape, name='X.shape')
 print_line(y.shape, name='y.shape')
 
-# Take a look at one digit from the dataset
 some_digit = X[36000]
 some_digit_image = some_digit.reshape(28, 28)
 plt.imshow(some_digit_image, cmap=mpl.cm.binary, interpolation="nearest")
@@ -105,8 +108,9 @@ X_train, X_test, y_train, y_test = X[:60000], X[60000:], y[:60000], y[60000:]
 shuffle_index = np.random.permutation(60000)
 X_train, y_train = X_train[shuffle_index], y_train[shuffle_index]
 
-# Binary classifier
-y_train_5 = (y_train == 5)  # True for all 5s, False for all other digits.
+# Train a binary classifier
+# True for all 5s, False for all other digits
+y_train_5 = (y_train == 5)
 y_test_5 = (y_test == 5)
 
 from sklearn.linear_model import SGDClassifier
