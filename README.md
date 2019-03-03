@@ -1,6 +1,6 @@
 # README
 
-AI notes.
+Some AI notes.
 
 ## Books
 1. [Data Science from Scratch](http://shop.oreilly.com/product/0636920033400.do)
