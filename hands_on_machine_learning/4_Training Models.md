@@ -6,6 +6,8 @@ So far we have treated Machine Learning models and their training algorithms mos
 
 However, having a good understanding of how things work can help you quickly home in on the appropriate model, the right training algorithm to use, and a good set of hyperparameters for your task. Understanding what’s under the hood will also help you debug issues and perform error analysis more efficiently. Lastly, most of the top‐ ics discussed in this chapter will be essential in understanding, building, and training neural networks (discussed in Part II of this book).
 
+
+
 ## Reference
 
 1. [Hands-On Machine Learning with Scikit-Learn and TensorFlow](http://shop.oreilly.com/product/0636920052289.do)
